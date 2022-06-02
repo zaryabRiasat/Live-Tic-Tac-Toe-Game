@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/background_theme"
+    tools:context=".MainActivity"
+    android:padding="10dp">
+
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/title"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
+        android:layout_gravity="center"
+        android:layout_marginTop="25dp"/>
+
+    <EditText
+        android:id="@+id/etEmail"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:hint="Email"
+        android:textSize="25sp"
+        android:inputType="textEmailAddress"
+        android:drawableStart="@drawable/custom_icon_email"
+        android:drawablePadding="10dp"
+        android:background="@drawable/custom_input"
+        android:textColor="@color/dark_blue"
+        android:layout_gravity="center_horizontal"
+        android:maxLines="1"
+        android:paddingStart="15dp"/>
+
+    <EditText
+        android:id="@+id/etPassword"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:hint="Password"
+        android:inputType="textPassword"
+        android:drawableStart="@drawable/custom_icon_lock"
+        android:drawablePadding="10dp"
+        android:textSize="25sp"
+        android:maxLines="1"
+        android:background="@drawable/custom_input"
+        android:textColor="@color/dark_blue"
+        android:layout_gravity="center_horizontal"
+        android:paddingStart="15dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/forgotPasswordBtn"
+            android:text="Forgot Password?"
+            android:background="@android:color/transparent"
+            android:textColor="@color/dark_blue"
+            android:textAllCaps="false"
+            android:textSize="16dp"
+            android:layout_weight="9"
+            android:textStyle="bold"
+            android:paddingLeft="150dp"
+            />
+
+        <ImageButton
+            android:id="@+id/fbButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/fb"
+            android:scaleType="fitCenter"
+            android:padding="2dp"
+            android:background="@android:color/transparent"
+            ></ImageButton>
+
+    </LinearLayout>
+
+
+
+    <Button
+        android:id="@+id/btnLogin"
+        android:layout_width="215dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:text="@string/login"
+        android:textColor="@color/white"
+        android:textStyle="normal|bold"
+        android:textSize="20dp"
+        android:background="@drawable/rounded_corner"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Don't have an Account?"
+        android:textColor="@color/dark_blue"
+        android:textSize="20dp"
+        android:layout_marginTop="5dp"
+        android:textStyle="bold"
+        android:gravity="center"/>
+
+    <Button
+        android:id="@+id/btnRegister"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textSize="20sp"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:background="@android:color/transparent"
+        android:text="Click Here To Register!"
+        android:textColor="@color/dark_blue"/>
+
+
+
+
+
+    <Button
+        android:id="@+id/btnPlayOffline"
+        android:layout_width="280dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:text="@string/playOffline"
+        android:textColor="@color/white"
+        android:layout_marginTop="120dp"
+        android:background="@drawable/rounded_corner"
+        android:textStyle="normal|bold"
+        android:textSize="20dp"/>
+
+    <Button
+        android:id="@+id/btnHelp"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="5dp"
+        android:text="@string/help"
+        android:textSize="20dp"
+        android:textStyle="normal|bold"
+        android:textAllCaps="false"
+        android:background="@android:color/transparent"
+        android:textColor="@color/dark_blue"
+        android:gravity="center|bottom"/>
+
+</LinearLayout>

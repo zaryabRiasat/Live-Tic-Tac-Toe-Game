@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="facebook_app_id">416334856950386</string>
+    <string name="fb_login_protocol_scheme">fb416334856950386</string>
+    <string name="app_name">TicTacToe</string>
+    <string name="playOffline">Jouer déconnecté</string>
+    <string name="liveTicTacToe">Tic Tac Toe en direct</string>
+    <string name="login">Connexion</string>
+    <string name="register">S\'inscrire</string>
+    <string name="help">Aider</string>
+
+</resources>

@@ -1,0 +1,10 @@
+<resources>
+    <string name="facebook_app_id">416334856950386</string>
+    <string name="fb_login_protocol_scheme">fb416334856950386</string>
+    <string name="app_name">TicTacToe</string>
+    <string name="playOffline">Play Offline</string>
+    <string name="liveTicTacToe">Live Tic Tac Toe</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="help">Need Any Help?</string>
+</resources>
