@@ -459,6 +459,12 @@ public class OnlineRunActivity extends AppCompatActivity {
                         isDialogShown=true;
                         winDialog = new OnlineWinDialog(OnlineRunActivity.this, "Opponent won the game");
                     }
+                   /* if((doneBoxes.size() == 9 && isDialogShown) == true){
+
+                        final WinDialog winDialog1 = new WinDialog(OnlineRunActivity.this, "It is a Draw!");
+                        winDialog1.setCancelable(false);
+                        winDialog1.show();
+                    }*/
 
                     winDialog.setCancelable(false);
                     winDialog.show();
@@ -682,7 +688,7 @@ public class OnlineRunActivity extends AppCompatActivity {
         }
 
 
-        if(doneBoxes.size() >= 9 && (!isDialogShown) && (!checkPlayerWin(selectedByPlayer)) && (!checkPlayerWin(opponentUniqueId)) ){
+        if(doneBoxes.size() >= 9 /*&& (!isDialogShown) && (!checkPlayerWin(selectedByPlayer)) && (!checkPlayerWin(opponentUniqueId))*/ ){
            // onDestroy();
 
             final OnlineWinDialog  winDialog = new OnlineWinDialog(OnlineRunActivity.this, "It is a Draw!");
