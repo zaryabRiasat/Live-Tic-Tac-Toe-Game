@@ -2,12 +2,14 @@ package com.example.live_tik_tac_toe_project;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.PictureInPictureParams;
 import android.app.ProgressDialog;
@@ -39,7 +41,9 @@ import android.widget.Toast;
 import com.example.live_tik_tac_toe_project.Adapters.userSpecificAdapter;
 import com.facebook.react.modules.core.PermissionListener;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -93,6 +97,7 @@ public class OnlineRunActivity extends AppCompatActivity {
     private TextView txt_mesg_count;
 
     private boolean opponentFound = false;
+    private boolean gamejoin=false;
 
     private String opponentUniqueId = "0";
 
@@ -115,6 +120,9 @@ public class OnlineRunActivity extends AppCompatActivity {
 
     private int mesgCount=0;
     private boolean isDialogShown=false;
+    private boolean isGamejoin=false;
+    String connectionUniqueId="";
+    private boolean isLeaveDialogShown=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +132,7 @@ public class OnlineRunActivity extends AppCompatActivity {
             btnCall=findViewById(R.id.btnCall);
         lay_mesg_notify=findViewById(R.id.lay_mesg_notify);
         txt_mesg_count=findViewById(R.id.txt_mesg_count);
+
         mesgIds=new ArrayList<>();
         messagesFromDB=new ArrayList<>();
 
@@ -214,6 +223,7 @@ public class OnlineRunActivity extends AppCompatActivity {
 
                             String conId = connections.getKey();
                             Log.e("ConnectionParentID",conId);
+                            connectionUniqueId=conId;
 
 
                             int getPlayersCount = (int)connections.getChildrenCount();
@@ -268,7 +278,13 @@ public class OnlineRunActivity extends AppCompatActivity {
 //                                            Toast.makeText(OnlineRunActivity.this, "connect id"+connectionId, Toast.LENGTH_LONG).show();
                                            Log.e("connect id",connectionId);
                                             opponentFound = true;
+                                            if (opponentUniqueId!=null && (!opponentUniqueId.equals("")))
+                                            {
 
+                                            }
+
+                                            isGamejoin=true;
+                                            checkUserJoin();
                                             startJitsiMeet();
 
                                             databaseReference.child("turns").child(connectionId).addValueEventListener(turnsEventListener);
@@ -309,6 +325,14 @@ public class OnlineRunActivity extends AppCompatActivity {
                                         //RecieverName=getOpponentEmail;
                                         opponentUniqueId = players.getKey();
 
+                                        if (opponentUniqueId!=null && (!opponentUniqueId.equals("")))
+                                        {
+//                                            isGamejoin=true;
+
+                                        }
+
+                                        isGamejoin=true;
+                                        checkUserJoin();
 //                                        Toast.makeText(OnlineRunActivity.this, "reciever email"+""+rec_email, Toast.LENGTH_SHORT).show();
                                         playerTurn = opponentUniqueId ;
                                         applyPlayerTurn(playerTurn);
@@ -343,6 +367,7 @@ public class OnlineRunActivity extends AppCompatActivity {
 //
 //                            snapshot.child(connectionUniqueId).child(playerUniqueId).child("player_name").getRef().setValue(getPlayerName);
 
+//                            isGamejoin=false;
                             Map<String, Object> userInfo = new HashMap<>();
                             userInfo.put("player_name", getPlayerName);
                             userInfo.put("playermail", getPlayerEmail);
@@ -354,7 +379,8 @@ public class OnlineRunActivity extends AppCompatActivity {
 
                     else{
 
-                        String connectionUniqueId = String.valueOf(System.currentTimeMillis());
+                        connectionUniqueId = String.valueOf(System.currentTimeMillis());
+
 //                        snapshot.child(connectionUniqueId).child(playerUniqueId).child("playermail").getRef().setValue(getPlayerEmail);
 //
 //                        snapshot.child(connectionUniqueId).child(playerUniqueId).child("player_name").getRef().setValue(getPlayerName);
@@ -364,6 +390,8 @@ public class OnlineRunActivity extends AppCompatActivity {
                         userInfo.put("playermail", getPlayerEmail);
                         snapshot.child(connectionUniqueId).child(playerUniqueId).getRef().setValue(userInfo);
                         status = "waiting";
+//                        isGamejoin=false;
+
 
                     }
                 }
@@ -688,24 +716,14 @@ public class OnlineRunActivity extends AppCompatActivity {
         }
 
 
-        if(doneBoxes.size() >= 9 /*&& (!isDialogShown) && (!checkPlayerWin(selectedByPlayer)) && (!checkPlayerWin(opponentUniqueId))*/ ){
-           // onDestroy();
+        if(doneBoxes.size() >= 9  ){
+
 
             final OnlineWinDialog  winDialog = new OnlineWinDialog(OnlineRunActivity.this, "It is a Draw!");
             winDialog.setCancelable(false);
             winDialog.show();
             String  test="";
         }
-
-/*
-        if((!checkPlayerWin(selectedByPlayer)) && (!checkPlayerWin(opponentUniqueId)))
-        {
-            Toast.makeText(this, "HelloWorld", Toast.LENGTH_SHORT).show();
-            final OnlineWinDialog  winDialog = new OnlineWinDialog(OnlineRunActivity.this, "It is a Draw!");
-            winDialog.setCancelable(false);
-            winDialog.show();
-        }*/
-
 
     }
 
@@ -830,25 +848,15 @@ int callState=0;
         enterPictureInPictureMode(pip_Builder.build());
     }
 
-    /*@Override
-    public void requestPermissions(String[] permissions, int requestCode, PermissionListener listener) {
-        JitsiMeetActivityDelegate.requestPermissions(this,permissions,requestCode,listener);
-    }
 
-    @Override
-    protected void onActivityResult(
-            int requestCode,
-            int resultCode,
-            Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        JitsiMeetActivityDelegate.onActivityResult(
-                this, requestCode, resultCode, data);
-    }*/
 
 
     @Override
     protected void onStart() {
         super.onStart();
+        String child="";
+
+
         if (mDatabase!=null)
         {
             mDatabase.addValueEventListener(new ValueEventListener() {
@@ -974,51 +982,11 @@ int callState=0;
 
 
 
-       /* if(doneBoxes.size() >= 9 && (!isDialogShown)){
-
-            Toast.makeText(this, "total done: "+doneBoxes.size(), Toast.LENGTH_SHORT).show();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    isDialogShown=true;
-                    final Dialog dialog=new Dialog(OnlineRunActivity.this);
-                    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                    dialog.setContentView(R.layout.activity_win_dialog);
-                    WindowManager.LayoutParams params=dialog.getWindow().getAttributes();
-                    params.width=WindowManager.LayoutParams.WRAP_CONTENT;
-                    params.height=WindowManager.LayoutParams.WRAP_CONTENT;
-                    dialog.getWindow().setGravity(Gravity.CENTER);
-                    dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-
-                    TextView messageTV;
-                    Button startBtn;
-
-                    messageTV = dialog.findViewById(R.id.messageTV);
-                    startBtn = dialog.findViewById(R.id.startNewBtn);
-
-                    messageTV.setText("It is a Draw!");
-                    startBtn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            dialog.dismiss();
-                        }
-                    });
-
-
-                    final WinDialog winDialog = new WinDialog(OnlineRunActivity.this, "It is a Draw!");
-                    winDialog.setCancelable(false);
-                    winDialog.show();
-                }
-            });
-
-        }
-        else
-        {*/
             ClearChat();
             hangUp();
 //        view.dispose();
 //        view = null;
+
 
 
 //        JitsiMeetActivityDelegate.onHostDestroy(this);
@@ -1046,12 +1014,82 @@ int callState=0;
 //        JitsiMeetActivityDelegate.onRequestPermissionsResult(requestCode, permissions, grantResults);
 //    }
 
+    private void checkUserJoin()
+    {
+        if (databaseReference!=null) {
+            databaseReference.child("connections").child(connectionUniqueId).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                    for (DataSnapshot snapshot12: snapshot.getChildren())
+//                    {
+//                        Toast.makeText(OnlineRunActivity.this, "size: "+snapshot.getChildrenCount(), Toast.LENGTH_SHORT).show();
+
+                        if (isGamejoin ) {
+
+
+//                            Toast.makeText(OnlineRunActivity.this, "Hi: "+snapshot.getChildrenCount(), Toast.LENGTH_SHORT).show();
+
+                            if ((snapshot.getChildrenCount() < 2)) {
+                                if (!isLeaveDialogShown) {
+
+
+                                    Context mcontext= OnlineRunActivity.this;
+
+                                    if (mcontext!=null && (!((Activity)mcontext).isFinishing() )) {
+
+
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(OnlineRunActivity.this);
+                                        builder.setMessage("Your opponent has left the match!")
+                                                .setCancelable(false)
+                                                .setPositiveButton("Leave", new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int id) {
+                                                        databaseReference.child("connections").child(connectionUniqueId)
+                                                                .child(playerUniqueId)
+                                                                .setValue(null);
+                                                        finishAffinity();
+                                                        startActivity(new Intent(OnlineRunActivity.this, OnlineActivity.class));
+
+                                                    }
+                                                });
+
+                                        AlertDialog alert = builder.create();
+                                        alert.show();
+                                        isLeaveDialogShown = true;
+
+                                        alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                            @Override
+                                            public void onDismiss(DialogInterface dialogInterface) {
+                                                isLeaveDialogShown = false;
+                                            }
+                                        });
+
+                                    }
+
+                                }
+                            }
+
+                        }
+
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
+    }
     @Override
     protected void onResume() {
-
+//        checkUserJoin();
 
 //        JitsiMeetActivityDelegate.onHostResume(this);
         super.onResume();
+
+
+
+
     }
 
 
@@ -1212,11 +1250,6 @@ int callState=0;
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                //Add RecyclerView Code here
-//                messagesFromDB=new ArrayList<>();
-
-
-
                 for(DataSnapshot postSnapshots: dataSnapshot.getChildren())
                 {
                     userSpecificModel userModel=postSnapshots.getValue(userSpecificModel.class);
@@ -1304,4 +1337,35 @@ int callState=0;
 
         dialog5.show();
     }
+
+    @Override
+    public void onBackPressed() {
+//        Toast.makeText(this, ""+connectionUniqueId, Toast.LENGTH_SHORT).show();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(OnlineRunActivity.this);
+        builder.setMessage("Are you sure you want to leave the game?")
+                .setCancelable(false)
+                .setPositiveButton("Leave", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        databaseReference.child("connections").child(connectionUniqueId)
+                                .child(playerUniqueId)
+                                .setValue(null).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+//                                Toast.makeText(OnlineRunActivity.this, "Node deleted "+playerUniqueId, Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        finish();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+
+    }
+
 }
