@@ -22,6 +22,7 @@ import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.util.Rational;
 import android.view.Display;
@@ -78,6 +79,10 @@ public class OnlineRunActivity extends AppCompatActivity {
     private ArrayList<String> mesgIds;
     RecyclerView listOfMessage;
     Query query;
+    long Ssec=0;
+    CountDownTimer ctn;
+    boolean isTurnApplied=false;
+    boolean  isConterStarted=false;
     FirebaseRecyclerOptions<ChatMessage> options;
     FrameLayout lay_call;
     private JitsiMeetView view;
@@ -106,7 +111,7 @@ public class OnlineRunActivity extends AppCompatActivity {
     private String playerTurn = "";
     private String myName="";
     private String opoName="";
-
+  private TextView timer;
     private String connectionId = "";
     String RecieverName="";
 
@@ -123,6 +128,8 @@ public class OnlineRunActivity extends AppCompatActivity {
     private boolean isGamejoin=false;
     String connectionUniqueId="";
     private boolean isLeaveDialogShown=false;
+    private boolean isStartedGame=false;
+    private boolean isAutoTurnApplied=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,10 +139,96 @@ public class OnlineRunActivity extends AppCompatActivity {
             btnCall=findViewById(R.id.btnCall);
         lay_mesg_notify=findViewById(R.id.lay_mesg_notify);
         txt_mesg_count=findViewById(R.id.txt_mesg_count);
-
+        timer=findViewById(R.id.timer);
         mesgIds=new ArrayList<>();
         messagesFromDB=new ArrayList<>();
 
+        ctn=   new CountDownTimer(30000, 1000) {
+
+            public void onTick(long duration) {
+                //tTimer.setText("seconds remaining: " + millisUntilFinished / 1000);
+                //here you can have your logic to set text to edittext resource id
+                // Duration
+                isAutoTurnApplied=false;
+                long Mmin = (duration / 1000) / 60;
+                Ssec = (duration / 1000) % 60;
+
+                if (isTurnApplied)
+                {
+                    cancel();
+                    timer.setText("");
+                    isTurnApplied=false;
+                    isConterStarted=false;
+
+                }
+                else if(Ssec < 31) {
+                    timer.setText("" + Ssec+" secs");
+
+                }
+            }
+
+            public void onFinish() {
+                timer.setText("");
+
+
+                isConterStarted=false;
+                if (opponentUniqueId!=null && (!opponentUniqueId.equals("")))
+                {
+
+
+                    int randPos=getRandomNumberBetween(1,10);
+                    String pos=""+randPos;
+                    boolean isNumOkay=false;
+                    if (!doneBoxes.contains(pos) && playerTurn.equals(playerUniqueId))
+                    {
+                        isNumOkay=true;
+                    }
+
+                    while (!isNumOkay)
+                    {
+                        randPos=getRandomNumberBetween(1,10);
+                        pos=""+randPos;
+                        if (!doneBoxes.contains(pos) && playerTurn.equals(playerUniqueId))
+                        {
+                            isNumOkay=true;
+                            break;
+                        }
+
+                    }
+
+                    if (isNumOkay)
+                    {
+                        //Random Turn Here
+                        if(!doneBoxes.contains(pos) && playerTurn.equals(playerUniqueId)){
+
+
+                            databaseReference.child("turns").child(connectionId).child(String.valueOf(doneBoxes.size() + 1)).child("box_position").setValue(pos);
+                            databaseReference.child("turns").child(connectionId).child(String.valueOf(doneBoxes.size() + 1)).child("player_id").setValue(playerUniqueId);
+
+                            playerTurn = opponentUniqueId;
+                        }
+                        playerTurn = opponentUniqueId ;
+                        isTurnApplied=false;
+                        isAutoTurnApplied=true;
+                        applyPlayerTurn(playerTurn);
+
+
+                    }
+
+
+
+                }
+                if (isAutoTurnApplied)
+                {
+                    reInitCounter();
+                }
+                else {
+                    ctn.start();
+                }
+
+            }
+
+        };
 
         if (mesgCount<=0)
         {
@@ -160,6 +253,7 @@ public class OnlineRunActivity extends AppCompatActivity {
            });
         player1Layout = findViewById(R.id.player1Layout);
         player2Layout = findViewById(R.id.player2Layout);
+
 
         image1 = findViewById(R.id.image1);
         image2 = findViewById(R.id.image2);
@@ -235,6 +329,7 @@ public class OnlineRunActivity extends AppCompatActivity {
                                     playerTurn = playerUniqueId;
                                     applyPlayerTurn(playerTurn);
 
+
                                     boolean playerFound = false;
 
                                     for(DataSnapshot players : connections.getChildren()){
@@ -245,6 +340,14 @@ public class OnlineRunActivity extends AppCompatActivity {
                                             playerFound = true;
                                         }
                                         else if(playerFound){
+
+                                            if (playerTurn.equals(playerUniqueId))
+                                            {
+
+                                                isStartedGame=true;
+                                                isConterStarted=true;
+                                                ctn.start();
+                                            }
 
                                             String getOpponentPlayerName = players.child("player_name").getValue(String.class);
                                             Log.e("opponent name",""+getOpponentPlayerName);
@@ -328,6 +431,7 @@ public class OnlineRunActivity extends AppCompatActivity {
                                         if (opponentUniqueId!=null && (!opponentUniqueId.equals("")))
                                         {
 //                                            isGamejoin=true;
+                                            isStartedGame=true;
 
                                         }
 
@@ -655,6 +759,10 @@ public class OnlineRunActivity extends AppCompatActivity {
         if(playerUniqueId2.equals(playerUniqueId)){
             player1Layout.setBackgroundResource(R.drawable.round_back_dark_blue_stroke);
             player2Layout.setBackgroundResource(R.drawable.round_back_dark_blue_20);
+
+            isConterStarted=false;
+          //  Toast.makeText(this, "Hello world", Toast.LENGTH_SHORT).show();
+            startCounterFunc();
         }
         else{
             player2Layout.setBackgroundResource(R.drawable.round_back_dark_blue_stroke);
@@ -669,6 +777,8 @@ public class OnlineRunActivity extends AppCompatActivity {
         if(selectedByPlayer.equals(playerUniqueId)){
             imageView.setImageResource(R.drawable.x);
             playerTurn = opponentUniqueId;
+            isTurnApplied=true;
+            isConterStarted=false;
         }
         else{
             imageView.setImageResource(R.drawable.o);
@@ -1368,4 +1478,174 @@ int callState=0;
 
     }
 
+    private void startCounterFunc()
+    {
+         /*ctn=   new CountDownTimer(30000, 1000) {
+
+            public void onTick(long duration) {
+                //tTimer.setText("seconds remaining: " + millisUntilFinished / 1000);
+                //here you can have your logic to set text to edittext resource id
+                // Duration
+                long Mmin = (duration / 1000) / 60;
+                Ssec = (duration / 1000) % 60;
+
+                if (isTurnApplied)
+                {
+                    cancel();
+                    timer.setText("");
+                    isTurnApplied=false;
+                }
+                if (Ssec < 31) {
+                    timer.setText("" + Ssec+" secs");
+                }
+            }
+
+            public void onFinish() {
+                timer.setText("");
+
+            }
+
+        };*/
+
+
+        if(!isConterStarted)
+        {
+       //     Toast.makeText(this, "Hello yyy", Toast.LENGTH_SHORT).show();
+
+            if (isStartedGame)
+            {
+             //   Toast.makeText(this, "Hello worldzzz", Toast.LENGTH_SHORT).show();
+                isConterStarted=true;
+                if (isAutoTurnApplied)
+                {
+                    reInitCounter();
+                }
+                else
+                {
+                    ctn.start();
+                }
+
+            }
+
+
+        }
+
+    }
+
+    public static int getRandomNumberBetween(int min, int max) {
+        Random foo = new Random();
+        int randomNumber = foo.nextInt(max - min) + min;
+        if (randomNumber == min) {
+            // Since the random number is between the min and max values, simply add 1
+            return min + 1;
+        } else {
+            return randomNumber;
+        }
+    }
+
+    private void reInitCounter()
+    {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+              //  Toast.makeText(OnlineRunActivity.this, "Amjid", Toast.LENGTH_SHORT).show();
+                ctn=   new CountDownTimer(30000, 1000) {
+
+                    public void onTick(long duration) {
+                        //tTimer.setText("seconds remaining: " + millisUntilFinished / 1000);
+                        //here you can have your logic to set text to edittext resource id
+                        // Duration
+                      //  Toast.makeText(OnlineRunActivity.this, "Khan", Toast.LENGTH_SHORT).show();
+                        isAutoTurnApplied=false;
+
+
+                        Ssec = (duration / 1000) % 60;
+
+                        if (isTurnApplied)
+                        {
+                       //     Toast.makeText(OnlineRunActivity.this, "Kamal", Toast.LENGTH_SHORT).show();
+                            ctn.cancel();
+                            timer.setText("");
+                            isTurnApplied=false;
+                            isConterStarted=false;
+                         //   Toast.makeText(OnlineRunActivity.this, "Ssec"+Ssec, Toast.LENGTH_SHORT).show();
+
+
+                        }
+                        else if(Ssec < 31) {
+                            timer.setText("" + Ssec+" secs");
+
+                        }
+                    }
+
+                    public void onFinish() {
+                        timer.setText("");
+
+                     //   Toast.makeText(OnlineRunActivity.this, "Jamal"+Ssec, Toast.LENGTH_SHORT).show();
+
+                        isConterStarted=false;
+                        if (opponentUniqueId!=null && (!opponentUniqueId.equals("")))
+                        {
+
+
+                            int randPos=getRandomNumberBetween(1,10);
+                            String pos=""+randPos;
+                            boolean isNumOkay=false;
+                            if (!doneBoxes.contains(pos) && playerTurn.equals(playerUniqueId))
+                            {
+                                isNumOkay=true;
+                            }
+
+                            while (!isNumOkay)
+                            {
+                                randPos=getRandomNumberBetween(1,10);
+                                pos=""+randPos;
+                                if (!doneBoxes.contains(pos) && playerTurn.equals(playerUniqueId))
+                                {
+                                    isNumOkay=true;
+                                    break;
+                                }
+
+                            }
+
+                            if (isNumOkay)
+                            {
+                                //Random Turn Here
+                                if(!doneBoxes.contains(pos) && playerTurn.equals(playerUniqueId)){
+
+
+                                    databaseReference.child("turns").child(connectionId).child(String.valueOf(doneBoxes.size() + 1)).child("box_position").setValue(pos);
+                                    databaseReference.child("turns").child(connectionId).child(String.valueOf(doneBoxes.size() + 1)).child("player_id").setValue(playerUniqueId);
+
+                                    playerTurn = opponentUniqueId;
+                                }
+                                playerTurn = opponentUniqueId ;
+                                isTurnApplied=false;
+                                isAutoTurnApplied=true;
+                                applyPlayerTurn(playerTurn);
+
+
+                            }
+
+
+
+                        }
+                        if (isAutoTurnApplied)
+                        {
+                            reInitCounter();
+                        }
+                        else {
+                            ctn.start();
+                        }
+                    }
+
+                };
+
+                ctn.start();
+            }
+
+        });
+    }
 }

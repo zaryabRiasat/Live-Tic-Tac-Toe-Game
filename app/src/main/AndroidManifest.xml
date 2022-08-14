@@ -21,7 +21,7 @@
                 "screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="false" />
         <activity
-            android:name=".WingDialog"
+            android:name=".WinDialog"
             android:exported="false" />
         <activity
             android:name=".PlayerName"

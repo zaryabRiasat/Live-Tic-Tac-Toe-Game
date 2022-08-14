@@ -37,10 +37,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:textSize="12px"
+        android:textColor="@color/black"
         android:layout_toLeftOf="@+id/submit_button"
         android:layout_toRightOf="@+id/emoji_button"
-        android:hint="Type here..."
-        />
+        android:hint="Type here..." />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list_of_message"

@@ -136,12 +136,5 @@ public class LeaderBoardActivity extends AppCompatActivity
             }
 
             mAdapter.setDataList(rankList);
-
-
-
-
-
-
-
     }
 }
